@@ -1,2 +1,2 @@
 # Diaz-shopapp-react-app
-## Autor: Francisco Higuera
+## Autor: Kevin Diaz
