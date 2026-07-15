@@ -46,11 +46,11 @@ jobs:
           script: |
             set -e
 
-            mkdir -p /var/www/Diaz-shopapp-react-app/vetconnectapp
-            rm -rf /var/www/Diaz-shopapp-react-app/vetconnectapp/*
-            cp -r /tmp/react_build/dist/* /var/www/Diaz-shopapp-react-app/vetconnectapp/
+            mkdir -p /var/www/Diaz-shopapp-react-app
+            rm -rf /var/www/Diaz-shopapp-react-app/*
+            cp -r /tmp/react_build/dist/* /var/www/Diaz-shopapp-react-app/
 
-            chown -R www-data:www-data /var/www/Diaz-shopapp-react-app/vetconnectapp
+            chown -R www-data:www-data /var/www/Diaz-shopapp-react-app
 
             nginx -t
             systemctl reload nginx
