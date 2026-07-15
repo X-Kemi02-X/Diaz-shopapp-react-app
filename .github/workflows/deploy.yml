@@ -1,0 +1,62 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: vetconnectapp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vetconnectapp
+        run: npm ci
+
+      - name: Build
+        working-directory: vetconnectapp
+        run: npm run build
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            rm -rf /tmp/Diaz-shopapp-react-app-dist
+            mkdir -p /tmp/Diaz-shopapp-react-app-dist
+
+      - name: Copy dist to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "vetconnectapp/dist/*"
+          target: "/tmp/Diaz-shopapp-react-app-dist/"
+          strip_components: 2
+
+      - name: Move files into web root
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            rm -rf /var/www/Diaz-shopapp-react-app/*
+            cp -r /tmp/Diaz-shopapp-react-app-dist/* /var/www/Diaz-shopapp-react-app/
+            rm -rf /tmp/Diaz-shopapp-react-app-dist
+            sudo systemctl reload nginx
