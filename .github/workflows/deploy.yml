@@ -27,6 +27,14 @@ jobs:
         working-directory: vetconnectapp
         run: npm run build
 
+      - name: Debug secret presence
+        run: |
+          echo "vps_key length: ${#vps_key}"
+          echo "vps_host: $vps_key_host"
+        env:
+          vps_key: ${{ secrets.vps_key }}
+          vps_key_host: ${{ secrets.vps_host }}
+
       - name: Decode SSH key
         run: |
           echo "${{ secrets.vps_key }}" | base64 -d > /tmp/deploy_key
