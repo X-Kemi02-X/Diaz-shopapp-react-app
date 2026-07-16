@@ -27,17 +27,18 @@ jobs:
         working-directory: vetconnectapp
         run: npm run build
 
-      - name: Check secrets are set
+      - name: Decode SSH key
         run: |
-          if [ -z "${{ secrets.vps_host }}" ]; then echo "VPS_HOST MISSING"; else echo "VPS_HOST ok"; fi
-          if [ -z "${{ secrets.vps_key }}" ]; then echo "VPS_SSH_KEY MISSING"; else echo "VPS_SSH_KEY ok"; fi
+          echo "${{ secrets.vps_key }}" | base64 -d > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          echo "key bytes: $(wc -c < /tmp/deploy_key)"
 
-      - name: Deploy via SSH
+      - name: Prepare remote temp dir
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.vps_host }}
           username: ${{ secrets.vps_user }}
-          key: ${{ secrets.vps_key }}
+          key_path: /tmp/deploy_key
           script: |
             set -e
             rm -rf /tmp/Diaz-shopapp-react-app-dist
@@ -48,7 +49,7 @@ jobs:
         with:
           host: ${{ secrets.vps_host }}
           username: ${{ secrets.vps_user }}
-          key: ${{ secrets.vps_key }}
+          key_path: /tmp/deploy_key
           source: "vetconnectapp/dist/*"
           target: "/tmp/Diaz-shopapp-react-app-dist/"
           strip_components: 2
@@ -58,7 +59,7 @@ jobs:
         with:
           host: ${{ secrets.vps_host }}
           username: ${{ secrets.vps_user }}
-          key: ${{ secrets.vps_key }}
+          key_path: /tmp/deploy_key
           script: |
             set -e
             rm -rf /var/www/Diaz-shopapp-react-app/*
