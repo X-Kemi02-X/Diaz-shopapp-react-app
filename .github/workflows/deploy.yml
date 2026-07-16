@@ -29,16 +29,15 @@ jobs:
 
       - name: Check secrets are set
         run: |
-          if [ -z "${{ secrets.VPS_HOST }}" ]; then echo "VPS_HOST MISSING"; else echo "VPS_HOST ok"; fi
-          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then echo "VPS_SSH_KEY MISSING"; else echo "VPS_SSH_KEY ok"; fi
+          if [ -z "${{ secrets.vps_host }}" ]; then echo "VPS_HOST MISSING"; else echo "VPS_HOST ok"; fi
+          if [ -z "${{ secrets.vps_key }}" ]; then echo "VPS_SSH_KEY MISSING"; else echo "VPS_SSH_KEY ok"; fi
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: root
-          key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          host: ${{ secrets.vps_host }}
+          username: ${{ secrets.vps_user }}
+          key: ${{ secrets.vps_key }}
           script: |
             set -e
             rm -rf /tmp/Diaz-shopapp-react-app-dist
@@ -47,9 +46,9 @@ jobs:
       - name: Copy dist to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: root
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.vps_host }}
+          username: ${{ secrets.vps_user }}
+          key: ${{ secrets.vps_key }}
           source: "vetconnectapp/dist/*"
           target: "/tmp/Diaz-shopapp-react-app-dist/"
           strip_components: 2
@@ -57,9 +56,9 @@ jobs:
       - name: Move files into web root
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: root
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.vps_host }}
+          username: ${{ secrets.vps_user }}
+          key: ${{ secrets.vps_key }}
           script: |
             set -e
             rm -rf /var/www/Diaz-shopapp-react-app/*
